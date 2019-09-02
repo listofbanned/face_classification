@@ -5,12 +5,13 @@ from keras.models import load_model
 import numpy as np
 
 from utils.datasets import get_labels
-from utils.inference import detect_faces
+#from utils.inference import detect_faces
+from utils.inference import detect_rgb_faces
 from utils.inference import draw_text
 from utils.inference import draw_bounding_box
 from utils.inference import apply_offsets
-from utils.inference import load_detection_model
-from utils.inference import load_image
+#from utils.inference import load_detection_model
+#from utils.inference import load_image
 from utils.preprocessor import preprocess_input
 
 # parameters for loading data and images
@@ -29,7 +30,7 @@ emotion_offsets = (20, 40)
 emotion_offsets = (0, 0)
 
 # loading models
-face_detection = load_detection_model(detection_model_path)
+#face_detection = load_detection_model(detection_model_path)
 emotion_classifier = load_model(emotion_model_path, compile=False)
 gender_classifier = load_model(gender_model_path, compile=False)
 
@@ -38,12 +39,18 @@ emotion_target_size = emotion_classifier.input_shape[1:3]
 gender_target_size = gender_classifier.input_shape[1:3]
 
 # loading images
-rgb_image = load_image(image_path, grayscale=False)
-gray_image = load_image(image_path, grayscale=True)
+# rgb_image = load_image(image_path, grayscale=False)
+# gray_image = load_image(image_path, grayscale=True)
+###
+image = cv2.imread(image_path)
+rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+###
 gray_image = np.squeeze(gray_image)
 gray_image = gray_image.astype('uint8')
 
-faces = detect_faces(face_detection, gray_image)
+#faces = detect_faces(face_detection, gray_image)
+faces = detect_rgb_faces(rgb_image)
 for face_coordinates in faces:
     x1, x2, y1, y2 = apply_offsets(face_coordinates, gender_offsets)
     rgb_face = rgb_image[y1:y2, x1:x2]
@@ -79,4 +86,4 @@ for face_coordinates in faces:
     draw_text(face_coordinates, rgb_image, emotion_text, color, 0, -50, 1, 2)
 
 bgr_image = cv2.cvtColor(rgb_image, cv2.COLOR_RGB2BGR)
-cv2.imwrite('../images/predicted_test_image.png', bgr_image)
+cv2.imwrite('predicted_test_image.png', bgr_image)

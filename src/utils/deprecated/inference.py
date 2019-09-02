@@ -16,21 +16,6 @@ def load_detection_model(model_path):
 def detect_faces(detection_model, gray_image_array):
     return detection_model.detectMultiScale(gray_image_array, 1.3, 5)
 
-###
-def reorder_coordinates(detected_faces):
-    faces = []
-    for top, right, bottom, left in detected_faces:
-        x1, x2, y1, y2 = left, right, top, bottom
-        x, y, w, h = x1, y1, x2 - x1, y2 - y1
-        faces.append([x, y, w, h])
-
-    return np.asarray(faces)
-
-def detect_rgb_faces(image):
-    detect_faces = face_recognition.face_locations(image)
-    return reorder_coordinates(detect_faces)
-###
-
 def draw_bounding_box(face_coordinates, image_array, color):
     x, y, w, h = face_coordinates
     cv2.rectangle(image_array, (x, y), (x + w, y + h), color, 2)
